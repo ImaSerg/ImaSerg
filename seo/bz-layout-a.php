@@ -173,7 +173,7 @@ if ( ! function_exists( 'bz_layout_a' ) ) {
 						'flex_direction' => 'column',
 						'flex_gap'       => [ 'column' => '22', 'row' => '22', 'isLinked' => true, 'unit' => 'px', 'size' => 22 ],
 						'width'          => [ 'unit' => '%', 'size' => 100, 'sizes' => [] ],
-						'_css_classes'   => 'bz-subsections',
+						'css_classes'    => 'bz-subsections',
 						'padding'        => [ 'unit' => 'px', 'top' => '0', 'right' => '0', 'bottom' => '0', 'left' => '0', 'isLinked' => true ],
 					],
 					$kids
