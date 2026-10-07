@@ -71,6 +71,19 @@ def parse(path):
 
 
 pages = [parse(p) for p in sorted(glob.glob(os.path.join(SRC, "*.txt")))]
+
+# Client-approved deviations from the briefs (2026-10-07): upakovochnye-korobki keeps
+# a 500 pcs minimum run and a 4-hour quote turnaround.
+for p in pages:
+    if p["slug"] == "upakovochnye-korobki":
+        s = json.dumps(p, ensure_ascii=False)
+        for a, b in [("Тираж от 1000 шт", "Тираж от 500 шт"), ("Минимальный тираж — 1000 штук", "Минимальный тираж — 500 штук"),
+                     ("от партий в 1000 штук", "от партий в 500 штук"), ("От 1000 штук.", "От 500 штук.")]:
+            s = s.replace(a, b)
+        p.clear()
+        p.update(json.loads(s))
+        p["cta"] = p["cta"].rstrip(".") + " за 4 часа."
+
 json.dump(pages, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 for p in pages:
     nh = sum(1 for b in p["main"] if b[0] == "h")

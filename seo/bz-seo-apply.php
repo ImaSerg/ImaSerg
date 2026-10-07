@@ -188,6 +188,98 @@ if ( ! function_exists( 'bz_seo_apply' ) ) {
 			}
 		}
 
+		// 6. Card blocks, when texts for this page are supplied ($p['cards'] from cards.json).
+		if ( ! empty( $p['cards'] ) ) {
+			$c = $p['cards'];
+			// 6a. "Делаем …" block: lead card (1 text) + 3 cards (title + 1–2 lines). Located by the "Рассчитать стоимость тиража" button.
+			$feat = null;
+			foreach ( $d as $i => $sec ) {
+				foreach ( bz_seo_widgets( $sec ) as $w ) {
+					if ( 'button' === $w['widgetType'] && false !== mb_strpos( $w['settings']['text'] ?? '', 'Рассчитать стоимость' ) ) {
+						$feat = $i;
+						break 2;
+					}
+				}
+			}
+			if ( null === $feat ) {
+				return [ null, [ 'error' => 'feature block not found' ] ];
+			}
+			// Cards row = the container whose 4 children are containers holding only text-editors (lead + 3 cards).
+			$find   = function ( $el ) use ( &$find ) {
+				$kids = $el['elements'] ?? [];
+				if ( 4 === count( $kids ) ) {
+					$g = [];
+					foreach ( $kids as $kid ) {
+						$ws = bz_seo_widgets( $kid );
+						if ( 'container' !== ( $kid['elType'] ?? '' ) || ! $ws || array_filter( $ws, fn( $w ) => 'text-editor' !== $w['widgetType'] ) ) {
+							$g = null;
+							break;
+						}
+						$g[] = $ws;
+					}
+					if ( $g ) {
+						return $g;
+					}
+				}
+				foreach ( $kids as $kid ) {
+					if ( 'container' === ( $kid['elType'] ?? '' ) && ( $r = $find( $kid ) ) ) {
+						return $r;
+					}
+				}
+				return null;
+			};
+			$groups = $find( $d[ $feat ] ) ?: [];
+			if ( count( $groups ) !== 4 || count( $groups[0] ) !== 1 ) {
+				return [ null, [ 'error' => 'feature cards layout unexpected: ' . implode( ',', array_map( 'count', $groups ) ) ] ];
+			}
+			$set[ $groups[0][0]['id'] ] = [ 'editor' => esc_html( $c['lead'] ) ];
+			foreach ( $c['c3'] as $k => $card ) {
+				$g = $groups[ $k + 1 ];
+				$set[ $g[0]['id'] ] = [ 'editor' => esc_html( $card[0] ) ];
+				if ( count( $g ) >= 3 ) {
+					$set[ $g[1]['id'] ] = [ 'editor' => esc_html( $card[1] ) ];
+					$set[ $g[2]['id'] ] = [ 'editor' => esc_html( $card[2] ) ];
+				} else {
+					$set[ $g[1]['id'] ] = [ 'editor' => esc_html( $card[1] ) . '<br>' . esc_html( $card[2] ) ];
+				}
+			}
+
+			// 6b. Icon-card grid: heading + 6 × (icon, title, text). Located as the section with 6 icons and a heading.
+			$grid = null;
+			foreach ( $d as $i => $sec ) {
+				$ws = bz_seo_widgets( $sec );
+				$ic = array_filter( $ws, fn( $w ) => 'icon' === $w['widgetType'] );
+				if ( 6 === count( $ic ) && array_filter( $ws, fn( $w ) => 'heading' === $w['widgetType'] ) ) {
+					$grid = $i;
+					break;
+				}
+			}
+			if ( null === $grid ) {
+				return [ null, [ 'error' => 'icon grid not found' ] ];
+			}
+			$ws   = bz_seo_widgets( $d[ $grid ] );
+			$head = array_values( array_filter( $ws, fn( $w ) => 'heading' === $w['widgetType'] ) )[0];
+			$set[ $head['id'] ] = [ 'title' => $c['h5'] ?? 'Что вы получаете' ];
+			$k = -1;
+			$slot = 0;
+			foreach ( $ws as $w ) {
+				if ( 'icon' === $w['widgetType'] ) {
+					$k++;
+					$slot = 0;
+					$icon = $c['c5'][ $k ][0];
+					if ( ! isset( $p['_fa'] ) || isset( $p['_fa'][ $icon ] ) ) {
+						$set[ $w['id'] ] = [ 'selected_icon' => [ 'value' => 'fas fa-' . $icon, 'library' => 'fa-solid' ] ];
+					} else {
+						$log['icon_missing'][] = $icon;
+					}
+				} elseif ( 'text-editor' === $w['widgetType'] && $k >= 0 ) {
+					$set[ $w['id'] ] = [ 'editor' => esc_html( $c['c5'][ $k ][ 1 + $slot ] ) ];
+					$slot++;
+				}
+			}
+			$log['cards'] = "feat#$feat grid#$grid";
+		}
+
 		$log['links_unplaced'] = array_values( array_map( fn( $l ) => $l[0], $links ) );
 		bz_seo_patch( $d, $set, $remove );
 		return [ $d, [ 'set' => $set, 'remove' => $remove, 'log' => $log ] ];
