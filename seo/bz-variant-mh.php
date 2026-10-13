@@ -1,7 +1,7 @@
 <?php
 /**
  * "MoneyHub" palette variant: copy a light-design page into a new draft and remap it to
- * dark green-navy + lime, with a dark hero card and condensed uppercase headings.
+ * dark green-navy + lime, with a dark hero card. Only colours change; typography is kept.
  * Everything stays native Elementor settings + page Custom CSS.
  */
 
@@ -86,28 +86,12 @@ if ( ! function_exists( 'bz_mh_build' ) ) {
 		$ps['custom_css'] = bz_mh_map_str( $ps['custom_css'] ?? '', $map );
 		$ps['background_color'] = '#f4f5f1';
 
-		// 3. Dark band ("Этапы") flat gradient fix + condensed uppercase headings.
+		// 3. Dark band ("Этапы") gradient fix. Fonts are left exactly as on the source page (colour-only variant).
 		foreach ( $d as &$sec ) {
 			if ( 'gradient' === ( $sec['settings']['background_background'] ?? '' ) && '#10221c' === ( $sec['settings']['background_color'] ?? '' ) ) {
 				$sec['settings']['background_color']   = '#163027';
 				$sec['settings']['background_color_b'] = '#0b1712';
 			}
-			bz_mh_walk( $sec, function ( &$e ) use ( $sz ) {
-				if ( 'heading' !== ( $e['widgetType'] ?? '' ) ) {
-					return;
-				}
-				$s    = &$e['settings'];
-				$size = $s['typography_font_size']['size'] ?? 0;
-				if ( $size >= 30 ) {
-					$s['typography_font_family']    = 'Oswald';
-					$s['typography_font_weight']    = '700';
-					$s['typography_text_transform'] = 'uppercase';
-					$s['typography_letter_spacing'] = $sz( 0 );
-					$s['typography_line_height']    = $sz( 1.08, 'em' );
-					$s['typography_font_size']      = $sz( $size >= 60 ? 68 : 44 );
-				}
-				unset( $s );
-			} );
 		}
 		unset( $sec );
 
