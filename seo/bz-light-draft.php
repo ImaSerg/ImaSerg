@@ -127,7 +127,7 @@ if ( ! function_exists( 'bz_ld_build' ) ) {
 			'position'              => 'absolute',
 			'_position'             => 'absolute',
 			'_offset_orientation_h' => 'start',
-			'_offset_x'             => bz_ld_size( -16 ),
+			'_offset_x'             => bz_ld_size( -28 ),
 			'_offset_orientation_v' => 'start',
 			'_offset_y'             => bz_ld_size( $top ),
 			'z_index'               => 2,
@@ -160,6 +160,7 @@ if ( ! function_exists( 'bz_ld_build' ) ) {
 			'flex_direction' => 'column',
 			'flex_gap'       => [ 'column' => '24', 'row' => '24', 'isLinked' => true, 'unit' => 'px', 'size' => 24 ],
 			'width'          => bz_ld_size( 50, '%' ),
+			'width_tablet'   => bz_ld_size( 100, '%' ),
 			'width_mobile'   => bz_ld_size( 100, '%' ),
 		], [
 			// Badge: a link-less Button widget hugs its text and stays editable as a normal button.
@@ -208,6 +209,10 @@ if ( ! function_exists( 'bz_ld_build' ) ) {
 			'flex_justify_content'  => 'center',
 			'flex_align_items'      => 'flex-end',
 			'width'                 => bz_ld_size( 47, '%' ),
+			'width_tablet'          => bz_ld_size( 100, '%' ),
+			'min_height_tablet'     => bz_ld_size( 420 ),
+			'padding_tablet'        => bz_ld_px( 30, 30, 30, 250 ),
+			'overflow'              => 'visible', // callouts overhang the left edge; page CSS also forces overflow:visible
 			'width_mobile'          => bz_ld_size( 100, '%' ),
 			'min_height'            => bz_ld_size( 480 ),
 			'min_height_mobile'     => bz_ld_size( 260 ),
@@ -238,6 +243,8 @@ if ( ! function_exists( 'bz_ld_build' ) ) {
 			bz_ld_text( $h['crumbs'], 14, BZ_LD['ink'] ),
 			bz_ld_box( [
 				'flex_direction'        => 'row',
+				'flex_direction_tablet' => 'column',
+				'flex_align_items_tablet' => 'stretch',
 				'flex_direction_mobile' => 'column',
 				'flex_justify_content'  => 'space-between',
 				'flex_align_items'      => 'center',
